@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Safe File Name Generator</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#9aa4b2;
+      --accent:#7c5cff;
+      --glass: rgba(255,255,255,0.04);
+      --radius:12px;
+      --fw-regular: 400;
+      --fw-bold: 700;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(124,92,255,0.08), transparent 8%),
+        radial-gradient(600px 300px at 90% 90%, rgba(0,200,255,0.03), transparent 8%),
+        var(--bg);
+      color:#e6eef8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+
+    .card{
+      width:100%;
+      max-width:840px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.04);
+      display:grid;
+      gap:18px;
+      grid-template-columns: 1fr 360px;
+    }
+
+    @media (max-width:900px){
+      .card{grid-template-columns:1fr; padding:20px}
+    }
+
+    header{
+      grid-column: 1 / -1;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .title{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .logo{
+      width:56px;
+      height:56px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      background: linear-gradient(135deg, rgba(124,92,255,0.16), rgba(0,200,255,0.06));
+      color:var(--accent);
+      font-weight:800;
+      font-size:20px;
+      box-shadow: 0 4px 18px rgba(124,92,255,0.06);
+    }
+    h1{margin:0;font-size:18px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .controls{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    label{
+      font-size:13px;
+      color:var(--muted);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    input[type="text"]{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:var(--glass);
+      color:inherit;
+      outline:none;
+      font-size:14px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      background:linear-gradient(90deg,var(--accent), #4aa3ff 120%);
+      color:white;
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+      box-shadow: 0 6px 18px rgba(12,10,30,0.35);
+    }
+    .btn.ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--muted);
+      box-shadow:none;
+    }
+    .result{
+      background: rgba(255,255,255,0.02);
+      padding:12px;
+      border-radius:10px;
+      border:1px dashed rgba(255,255,255,0.03);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+      font-size:13px;
+      color:#cfe6ff;
+      word-break:break-all;
+    }
+
+    aside{
+      padding:14px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:180px;
+    }
+    .meta{
+      color:var(--muted);
+      font-size:13px;
+    }
+    .small{
+      font-size:12px;
+      color:var(--muted);
+    }
+    footer{
+      grid-column:1 / -1;
+      display:flex;
+      justify-content:flex-end;
+      color:var(--muted);
+      font-size:12px;
+      gap:12px;
+    }
+    .hint{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <header>
+      <div class="title">
+        <div class="logo">SF</div>
+        <div>
+          <h1>Safe File Name</h1>
+          <p class="lead">Generate a UUID-based safe filename while preserving an extension (if present).</p>
+        </div>
+      </div>
+      <div class="hint">Uses <code>crypto.randomUUID()</code> — supported in modern browsers</div>
+    </header>
+
+    <section class="controls" aria-labelledby="inputLabel">
+      <div>
+        <label id="inputLabel" for="nameInput">Original filename / content</label>
+        <input id="nameInput" type="text" placeholder="example.png or my.document.pdf or just-a-name" />
+      </div>
+
+      <div class="row">
+        <button id="generateBtn" class="btn">Generate safe name</button>
+        <button id="genRandomBtn" class="btn ghost" title="Generate UUID-only (no extension)">Generate random UUID</button>
+        <button id="pasteBtn" class="btn ghost" title="Paste from clipboard">Paste ↘</button>
+      </div>
+
+      <div>
+        <label>Result</label>
+        <div class="result" id="resultBox" aria-live="polite">—</div>
+      </div>
+
+      <div class="row">
+        <button id="copyBtn" class="btn ghost">Copy</button>
+        <button id="downloadBtn" class="btn">Download empty file</button>
+        <button id="showPartsBtn" class="btn ghost">Show parts</button>
+      </div>
+    </section>
+
+    <aside>
+      <div class="meta"><strong>Behavior</strong></div>
+      <div class="small">
+        <ul>
+          <li>When the input contains at least one dot (<code>.</code>), the text after the last dot is treated as the extension and kept.</li>
+          <li>If there is no dot, the result will be the UUID only.</li>
+          <li>Leading/trailing whitespace is trimmed before processing.</li>
+        </ul>
+      </div>
+
+      <div>
+        <label for="exampleSelect" class="small">Quick examples</label>
+        <select id="exampleSelect" style="width:100%; padding:8px; border-radius:8px; background:transparent; color:inherit; border:1px solid rgba(255,255,255,0.03)">
+          <option value="">— choose an example —</option>
+          <option>photo.jpg</option>
+          <option>report.final.pdf</option>
+          <option>archive</option>
+          <option>.env</option>
+          <option>backup.tar.gz</option>
+        </select>
+      </div>
+
+      <div class="meta" id="partsArea" style="display:none;">
+        <div><strong>Parsed parts</strong></div>
+        <div class="small" id="partsText">base: — | ext: —</div>
+      </div>
+    </aside>
+
+    <footer>
+      <div>Made to match your <code>safeFileName</code> logic</div>
+    </footer>
+  </main>
+
+  <script>
+    function safeFileName(content) {
+      const trimmed = (content ?? '').toString().trim();
+      const hex = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : fallbackUUID();
+      const fileNameParts = trimmed.split('.');
+      if (fileNameParts.length > 1 && trimmed !== '' && !trimmed.startsWith('.')) {
+        const ext = fileNameParts.pop();
+        return `${hex}.${ext}`;
+      } else {
+        return hex;
+      }
+    }
+
+    function fallbackUUID() {
+     
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    const nameInput = document.getElementById('nameInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const genRandomBtn = document.getElementById('genRandomBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const resultBox = document.getElementById('resultBox');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const showPartsBtn = document.getElementById('showPartsBtn');
+    const partsArea = document.getElementById('partsArea');
+    const partsText = document.getElementById('partsText');
+    const exampleSelect = document.getElementById('exampleSelect');
+
+    function updateResultFromInput() {
+      const val = nameInput.value;
+      const out = safeFileName(val);
+      resultBox.textContent = out;
+      partsArea.style.display = 'none';
+    }
+
+    generateBtn.addEventListener('click', () => {
+      updateResultFromInput();
+    });
+
+    genRandomBtn.addEventListener('click', () => {
+      
+      const hex = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : fallbackUUID();
+      resultBox.textContent = hex;
+      partsArea.style.display = 'none';
+    });
+
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        nameInput.value = text;
+        updateResultFromInput();
+      } catch (err) {
+        alert('Clipboard read failed — you can paste manually.');
+      }
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const text = resultBox.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(()=> copyBtn.textContent = 'Copy', 1200);
+      } catch (err) {
+      
+        alert('Copy to clipboard failed. Result:\n' + text);
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const fname = resultBox.textContent || safeFileName('');
+     
+      const blob = new Blob([''], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    showPartsBtn.addEventListener('click', () => {
+      const raw = (nameInput.value || '').trim();
+      if (raw === '') {
+        partsText.textContent = 'No input provided.';
+        partsArea.style.display = 'block';
+        return;
+      }
+      const parts = raw.split('.');
+      if (parts.length > 1 && !raw.startsWith('.')) {
+        const ext = parts.pop();
+        const base = parts.join('.');
+        partsText.textContent = `base: "${base}" | ext: "${ext}" (keeps last segment as extension)`;
+      } else {
+        partsText.textContent = `base: "${raw}" | ext: — (treated as no extension)`;
+      }
+      partsArea.style.display = 'block';
+    });
+
+    exampleSelect.addEventListener('change', (e) => {
+      const v = e.target.value;
+      if (!v) return;
+      nameInput.value = v;
+      updateResultFromInput();
+    });
+
+    nameInput.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        updateResultFromInput();
+      }
+    });
+
+    nameInput.value = 'example.png';
+    updateResultFromInput();
+  </script>
+</body>
+</html>
